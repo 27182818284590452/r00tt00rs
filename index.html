@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>r00tt00rs</title>
+        <link href="style.css" rel="stylesheet" type="text/css"></link>
+        <link rel="icon" href="Media/Floppy_nologo_red_sticker.png" type="image/png">
+    </head>
+
+    <body onload="">
+        <div class="wrapper">
+            <div class="container">
+                <!---<img src="Media/Keep_calm.png">-->
+                <!--<h2>Try out my console!</h2>-->
+                <div id="console">
+                  <canvas class="canvas"></canvas>
+                </div>
+            </div>
+       </div>
+      
+      <script>        
+        const canvas = document.querySelector('.canvas');
+        const width = canvas.width = window.innerWidth;
+        const height = canvas.height = window.innerHeight;
+        
+        const line_cnt = Math.round(height/25);
+        const colmn_cnt = Math.round(width/20);
+        console.log("Lines: " + line_cnt);
+        console.log("Columns: " + colmn_cnt);
+
+        const ctx = canvas.getContext('2d');
+        var current_column = 1;
+        var current_line = 1;
+
+        var current_user = "";
+
+        if(document.cookie == "user=root"){
+            current_user = "root";
+        }  else {
+            document.cookie = "user=nopriv";
+            current_user = "nopriv";
+        }
+
+
+        var folders = new Array("context", "history", "upcoming", "writeups");
+        current_folder = "~";
+
+        var help_dialog = 
+                    ["GNU bash, version 5.0.16(1)-release (x86_64-web-linux-gnu)",
+                    "These shell commands are defined internally.  Type `help' to see this list.",
+                    "Use `info bash' to find out more about the shell in general.",
+                    "cat            Print on the standard output.",
+                    "cd             Change the shell working directory.",
+                    "clear          Clear the terminal screen.",
+                    "echo           Write arguments to the standard output.",
+                    "exit           Exit the console.",
+                    "help           Print the help menu.",
+                    "ls             List all files and folders in directory.",
+                    "whoami         Print current user."];
+
+        mainloop();
+
+        function print_line_head(lin){
+            
+            if(lin++ == line_cnt){
+                console.log("Page overflow. char at: " + 0 + " " + lin);
+                reload_canvas();
+            } else {
+                ctx.fillStyle = 'rgb(0, 205, 0)';
+                ctx.fillText('→', 20, lin*25);
+                ctx.fillStyle = "rgb(0, 105, 255)";
+                ctx.fillText(current_folder, 40, lin*25);
+                current_column += (current_folder.length+1);
+            }
+        }
+
+        function print_char(color, char, col, lin){
+            console.log("Current column: " + col);
+            console.log("Current line: " + lin);
+            if(col++ ==colmn_cnt){
+                if(lin++ == line_cnt){
+                    console.log("Page overflow. char at: " + col + " " + 0);
+                    reload_canvas();
+                } else {
+                    console.log("Line overflow. char at: " + 0 + " " + lin);
+                    ctx.fillStyle = color;
+                    ctx.fillText(char, 0, (lin+1)*25);
+                    current_column = 1;
+                    current_line++;
+                }
+                
+            } else {
+                console.log("Now in normal printc");
+                if(lin++ == line_cnt){
+                    console.log("Page overflow. char at: " + col + " " + 0);
+                    reload_canvas();
+                } else {
+                    console.log("char at: " + col*14 + " " + lin*25);
+                    ctx.fillStyle = color;
+                    ctx.fillText(char, col*14, lin*25);
+                    current_column++
+                }
+            }
+        }
+
+        function reload_canvas(){
+            window.location.reload(false); 
+        }
+
+        function exe_cmd(cmd){
+            switch(cmd){
+                case "":
+                    current_line++;
+                    current_column = 1;
+                    print_line_head(current_line);
+                    break;
+
+                case "help":
+                    print_help();
+                    break;
+
+                case "whoami":
+                    print_user();
+                    break;
+
+                case "exit":
+                    exit_func();
+                    break;
+
+                case "cat":
+                    
+                    break;
+                
+                case "ls":
+                    print_files();
+                    print_line_head(current_line);
+                    break;
+                
+                case "clear":
+                    reload_canvas();
+                    break;
+
+                case "cd ..":
+                    if(current_folder != "~"){
+                        current_folder = "~";
+                    }
+                    current_column = 1;
+                    print_line_head(current_line);
+                    break;    
+
+                case "cd writeups":
+                    if(current_folder == "~"){
+                        current_folder = "writeups";
+                    }
+                    current_column = 1;
+                    print_line_head(current_line);
+                    break; 
+                
+                case "cd context":
+                    if(current_folder == "~"){
+                        current_folder = "context";
+                    } 
+                    current_column = 1;
+                    print_line_head(current_line);
+                    break; 
+                    
+                case "cd history":
+                    if(current_folder == "~"){
+                        current_folder = "history";
+                    }
+                    current_column = 1;
+                    print_line_head(current_line);
+
+                case "cd upcoming":
+                    if(current_folder == "~"){
+                        current_folder = "upcoming";
+                    }
+                    current_column = 1;
+                    print_line_head(current_line);
+                    break;
+
+                default:
+                    if(cmd.includes("echo")){
+                        if(cmd.indexOf("echo") == 0){
+                            let out = cmd.replace("echo", "");
+                            current_column = 1;
+                            for(let i = 0; i<cmd.length; i++){
+                                print_char("rgb(104,104,104)", out.charAt(i), current_column, current_line);
+                            }
+                            current_line++;
+                            current_column = 1;
+                            print_line_head(current_line);
+                        }
+                    } else {
+                        var msg = "Command not found. Type help for assistance."
+                        current_column = 1;
+                        for(let i = 0; i<msg.length; i++){
+                            print_char("rgb(255, 77, 77)", msg.charAt(i), current_column, current_line+1);
+                        }
+                        current_line+=2;
+                        current_column = 1;
+                        print_line_head(current_line);
+                    }
+                    break;
+            }
+        }
+
+        function print_user(){
+            for(let i = 0; i<current_user.length; i++){
+                print_char("104,104,104", current_user.charAt(i), current_column, current_line);
+            }
+            current_column = 1;
+            current_line++;
+            print_line_head(current_line);
+        }
+
+        function print_files(){
+            if(current_folder == "~"){
+                for(let j = 0; j < folders.length; j++){
+                    let f = folders[j];
+                    for(let i = 0; i<f.length; i++){
+                        print_char("rgb(0, 104, 255)", f.charAt(i), current_column, current_line);
+                    }
+                    print_char("rgb(0,104,255)", " ", current_column, current_line);
+                }
+                current_line++;
+                current_column = 1;
+            } else {
+                current_column = 1;
+            }
+        }
+
+        function exit_func(){
+            let msg = "Haha! Thought you could shut me down! Try another time!"
+            for(let i = 0; i<msg.length; i++){
+                print_char("rgb(255,77,77)", msg.charAt(i), current_column, current_line);
+            }
+            current_line++;
+            current_column = 1;
+            print_line_head(current_line);
+        }
+
+        /*function readJSON(path) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', path, true);
+            xhr.responseType = 'blob';
+            xhr.onload = function(e) { 
+            if (this.status == 200) {
+                var file = new File([this.response], 'temp');
+                var fileReader = new FileReader();
+                fileReader.addEventListener('load', function(){
+                    //do stuff with fileReader.result
+                    var res = fileReader.result;
+                });
+                fileReader.readAsText(file);
+            } 
+            }
+            xhr.send();
+        }*/
+
+        function print_help(){
+            for(let j = 0; j < help_dialog.length; j++){
+                let h= help_dialog[j];
+                for(let i = 0; i<h.length; i++){
+                    print_char("rgb(104, 104, 104)", h.charAt(i), current_column, current_line);
+                }
+                current_line++;
+                current_column = 1;
+            }
+            print_line_head(current_line);
+        }
+
+        function mainloop(){
+
+            var date = new Date();
+            date.setTime(date.getTime + 10 * 60 *1000);
+
+            ctx.fillStyle = 'rgb(0, 0, 0)';
+            ctx.fillRect(0, 0, width, height);
+            ctx.font = "20px Ubuntu Mono";
+
+            print_line_head(current_line);
+
+            var command = "";
+
+            window.addEventListener("keydown", function(event){
+                if(event.defaultPrevented){
+                    return;
+                }
+
+                switch(event.key){
+                    case "Enter":
+                        current_column = 1;
+                        current_line++;
+                        var cmd_stored = command;
+                        exe_cmd(cmd_stored);
+                        command = "";
+                        break;
+
+                    case "Space":
+                        print_char("rgb(104,104,104)", " ", current_column, current_line);
+                        command = command.concat(" ");
+                        break;
+                    
+                    case "Alt":
+                    case "Altgraph":
+                    case "ArrowRight":
+                    case "ArrowLeft":
+                    case "ArrowUp":
+                    case "ArrowDown":
+                    case "Dead":
+                    case "Tab":
+                    case "CapsLock":
+                    case "Backspace":
+                    case "Shift":
+                    case "Control":
+                        print_char("rgb(104,104,104)", "", current_column, current_line);
+                        break;
+
+                    default:
+                        console.log(event.key);
+                        print_char("rgb(104,104,104)", event.key, current_column, current_line);
+                        command = command.concat(event.key);
+                        break;
+                }
+            })
+        }
+      </script>
+  </body>
+
+</html>

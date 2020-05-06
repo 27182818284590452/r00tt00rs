@@ -1,0 +1,18 @@
+html{
+    font-family: "Ubuntu Mono";
+}
+body{
+    margin: 0;
+    overflow: hidden;
+}
+.container{
+    background-color: black;
+}
+
+img{
+    padding-top: 10px;
+}
+
+h2{
+    color: white;
+}
